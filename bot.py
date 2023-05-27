@@ -1,12 +1,16 @@
 import telebot
 from deepface import DeepFace
+import sqlite3
+
 import time
 
 import DATA
 import face
 import infrastructyre
+import authorize
 
 bot = telebot.TeleBot(DATA.TOKEN, parse_mode=None)
+aut = authorize.Authorize(bot)
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -34,46 +38,79 @@ def comparison_face1(message):
     print(result)
 
 
-@bot.message_handler(content_types=['photo'])
-def photo(message):
-    print('message.photo =', message.photo)
-    fileID = message.photo[-1].file_id
-    print('fileID =', fileID)
-    file_info = bot.get_file(fileID)
-    print('file.file_path =', file_info.file_path)
-    downloaded_file = bot.download_file(file_info.file_path)
+# @bot.message_handler(content_types=['photo'])
+# def photo(message):
+#     print('message.photo =', message.photo)
+#     fileID = message.photo[-1].file_id
+#     print('fileID =', fileID)
+#     file_info = bot.get_file(fileID)
+#     print('file.file_path =', file_info.file_path)
+#     downloaded_file = bot.download_file(file_info.file_path)
 
-    with open("photos/image_handler.jpg", 'wb') as new_file:
-        new_file.write(downloaded_file)
+#     with open("photos/image_handler.jpg", 'wb') as new_file:
+#         new_file.write(downloaded_file)
 
-    # infrastructyre.time_saver(message=message, bot=bot)
-    result = face.face_verify("img/body11.jpg")
-    bot.reply_to(message, "Verified - " + result)
-    print(result)
-    result_dist = face.face_analyz()
+#     # infrastructyre.time_saver(message=message, bot=bot)
+#     result = face.face_verify("img/body11.jpg")
+#     bot.reply_to(message, "Verified - " + result)
+#     print(result)
+#     result_dist = face.face_analyz()
 
-    # print data json
-    infrastructyre.print_data_json(message, bot, result_dist)
+#     # print data json
+#     infrastructyre.print_data_json(message, bot, result_dist)
 
 
-@bot.message_handler(commands=['photos'])
-def photostest(message):
-    print('analyz last photo')
-    infrastructyre.time_saver(message=message, bot=bot)
-    result = face.face_verify("img/body11.jpg")
-    infrastructyre.serch_last_photo(message=message, bot=bot)
-    bot.reply_to(message, "Verified - " + result)
-    print(result)
-    result_dist = face.face_analyz()
-    # print data json
-    infrastructyre.print_data_json(message, bot, result_dist)
+# @bot.message_handler(commands=['photos'])
+# def photostest(message):
+#     print('analyz last photo')
+#     infrastructyre.time_saver(message=message, bot=bot)
+#     result = face.face_verify("img/body11.jpg")
+#     infrastructyre.serch_last_photo(message=message, bot=bot)
+#     bot.reply_to(message, "Verified - " + result)
+#     print(result)
+#     result_dist = face.face_analyz()
+#     # print data json
+#     infrastructyre.print_data_json(message, bot, result_dist)
 
 
 @bot.message_handler(commands=['singIN'])
 def sing(message):
-    print('sing')
-    bot.send_message(message.chat.id, 'Регитсрация')
-    bot.send_message(message.chat.id, 'Пришлите фото для регистрации')
+    print('singIN')
+
+    print('getStatus - ' + str(aut.getStatus()))
+
+    if aut.getStatus() == True:
+        mesg = bot.send_message(message.chat.id, 'Вы уже авторизированны.')
+    else:
+        mesg = bot.send_message(message.chat.id, 'Отправте своё фото: ↓')
+        print("botT - " + str(bot))
+        aut.getBotAut()
+        bot.register_next_step_handler(mesg, aut.photo_reg)
+
+
+@bot.message_handler(commands=['logIN'])
+def sing(message):
+    print('logIN')
+
+    if aut.getStatus() == True:
+        mesg = bot.send_message(message.chat.id, 'Вы уже авторизированны.')
+    else:
+        mesg = bot.send_message(message.chat.id, 'Отправте своё фото: ↓')
+        print("botT - " + str(bot))
+        aut.getBotAut()
+        bot.register_next_step_handler(mesg, aut.logIN)
+
+
+@bot.message_handler(commands=['logOUT'])
+def sing(message):
+    print('logOUT')
+
+    if aut.getStatus() == False:
+        mesg = bot.send_message(message.chat.id, 'Вы ещё не авторизированны.')
+    else:
+        mesg = bot.send_message(message.chat.id, 'Вы вышли.')
+        print("botT - " + str(bot))
+        aut.louOUT()
 
 
 @bot.message_handler(commands=['test'])
