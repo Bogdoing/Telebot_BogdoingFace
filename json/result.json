@@ -1,1 +1,1 @@
-"{'verified': True, 'distance': 0.059454768600374686, 'threshold': 0.4, 'model': 'VGG-Face', 'detector_backend': 'opencv', 'similarity_metric': 'cosine', 'facial_areas': {'img1': {'x': 102, 'y': 446, 'w': 521, 'h': 521}, 'img2': {'x': 122, 'y': 394, 'w': 549, 'h': 549}}, 'time': 6.97}"
+"{'verified': True, 'distance': 7.771561172376096e-16, 'threshold': 0.4, 'model': 'VGG-Face', 'detector_backend': 'opencv', 'similarity_metric': 'cosine', 'facial_areas': {'img1': {'x': 119, 'y': 421, 'w': 498, 'h': 498}, 'img2': {'x': 119, 'y': 421, 'w': 498, 'h': 498}}, 'time': 5.95}"

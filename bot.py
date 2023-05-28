@@ -18,10 +18,6 @@ def send_welcome(message):
     bot.reply_to(message, "Howdy, how are you doing?")
 
 
-# @bot.message_handler(func=lambda message: True)
-# def echo_all(message):
-#     bot.reply_to(message, message.text)
-
 @bot.message_handler(commands=['comparison', 'com'])
 def comparison_face(message):
     result = DeepFace.verify(img1_path="img/jim1.jpg",
@@ -38,42 +34,7 @@ def comparison_face1(message):
     print(result)
 
 
-# @bot.message_handler(content_types=['photo'])
-# def photo(message):
-#     print('message.photo =', message.photo)
-#     fileID = message.photo[-1].file_id
-#     print('fileID =', fileID)
-#     file_info = bot.get_file(fileID)
-#     print('file.file_path =', file_info.file_path)
-#     downloaded_file = bot.download_file(file_info.file_path)
-
-#     with open("photos/image_handler.jpg", 'wb') as new_file:
-#         new_file.write(downloaded_file)
-
-#     # infrastructyre.time_saver(message=message, bot=bot)
-#     result = face.face_verify("img/body11.jpg")
-#     bot.reply_to(message, "Verified - " + result)
-#     print(result)
-#     result_dist = face.face_analyz()
-
-#     # print data json
-#     infrastructyre.print_data_json(message, bot, result_dist)
-
-
-# @bot.message_handler(commands=['photos'])
-# def photostest(message):
-#     print('analyz last photo')
-#     infrastructyre.time_saver(message=message, bot=bot)
-#     result = face.face_verify("img/body11.jpg")
-#     infrastructyre.serch_last_photo(message=message, bot=bot)
-#     bot.reply_to(message, "Verified - " + result)
-#     print(result)
-#     result_dist = face.face_analyz()
-#     # print data json
-#     infrastructyre.print_data_json(message, bot, result_dist)
-
-
-@bot.message_handler(commands=['singIN'])
+@bot.message_handler(commands=['singin'])
 def sing(message):
     print('singIN')
 
@@ -88,21 +49,22 @@ def sing(message):
         bot.register_next_step_handler(mesg, aut.photo_reg)
 
 
-@bot.message_handler(commands=['logIN'])
-def sing(message):
+@bot.message_handler(commands=['login'])
+def login(message):
     print('logIN')
 
     if aut.getStatus() == True:
         mesg = bot.send_message(message.chat.id, 'Вы уже авторизированны.')
     else:
-        mesg = bot.send_message(message.chat.id, 'Отправте своё фото: ↓')
+        # mesg = bot.send_message(message.chat.id, 'Отправте своё фото: ↓')
+        mesg = bot.send_message(message.chat.id, 'Введите свой Id: ↓')
         print("botT - " + str(bot))
         aut.getBotAut()
-        bot.register_next_step_handler(mesg, aut.logIN)
+        bot.register_next_step_handler(mesg, aut.logInId)
 
 
-@bot.message_handler(commands=['logOUT'])
-def sing(message):
+@bot.message_handler(commands=['logout'])
+def logout(message):
     print('logOUT')
 
     if aut.getStatus() == False:
@@ -113,9 +75,43 @@ def sing(message):
         aut.louOUT()
 
 
-@bot.message_handler(commands=['test'])
-def test(message):
-    infrastructyre.users_counter_file()
+@bot.message_handler(commands=['info'])
+def info(message):
+    print('info')
+
+    if aut.getStatus() == False:
+        bot.send_message(
+            message.chat.id, 'Чтобы узнать информациб пользователя необходимо авторизоваться')
+    else:
+        result_dist = face.face_analyz()
+        infrastructyre.print_data_json(message, bot, result_dist)
+
+
+@bot.message_handler(commands=['face'])
+def faces(message):
+    mesg = bot.send_message(message.chat.id, 'Отправьте фото для обработки: ↓')
+    bot.register_next_step_handler(mesg, faces_analyze)
+
+
+def faces_analyze(message):
+    print('message.photo =', message.photo)
+    fileID = message.photo[-1].file_id
+    print('fileID =', fileID)
+    file_info = bot.get_file(fileID)
+    print('file.file_path =', file_info.file_path)
+    downloaded_file = bot.download_file(file_info.file_path)
+
+    with open("photos/image_handler.jpg", 'wb') as new_file:
+        new_file.write(downloaded_file)
+
+    # infrastructyre.time_saver(message=message, bot=bot)
+    # result = face.face_verify("img/body11.jpg")
+    # bot.reply_to(message, "Verified - " + result)
+    # print(result)
+    result_dist = face.face_analyz()
+
+    # print data json
+    infrastructyre.print_data_json(message, bot, result_dist)
 
 
 bot.infinity_polling()

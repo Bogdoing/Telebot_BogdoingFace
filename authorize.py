@@ -1,6 +1,9 @@
 import sqlite3
 from deepface import DeepFace
 
+from PIL import Image
+import io
+
 import face
 import infrastructyre
 
@@ -20,7 +23,6 @@ class Authorize():
 
 
 ###
-
 
     def getUserId(self):
         print("User id - " + str(self.user_id))
@@ -46,6 +48,8 @@ class Authorize():
 
         with open("photos/registr_img.jpg", 'wb') as new_file:
             new_file.write(downloaded_file)
+        with open("photos/image_handler.jpg", 'wb') as new_file:
+            new_file.write(downloaded_file)
 
         mesg = self.bot.send_message(message.chat.id, 'Введите пароль: ↓')
 
@@ -66,16 +70,20 @@ class Authorize():
 
         c = con.cursor()
 
-        # con.execute(
-        #     '''CREATE TABLE Users (Id INTEGER PRIMARY KEY, login VARCHAR(255), login_photo BLOB, password VARCHAR(255));''')
-
         c.execute('INSERT INTO Users (login, login_photo, password) VALUES (?, ?, ?)',
                   ("login", login_photo, message.text))
         con.commit()
+
+        c.execute(
+            'SELECT MAX(id) id from Users ')
+        result = c.fetchall()
+
         con.close()
 
-        mesg = self.bot.send_message(
+        self.bot.send_message(
             message.chat.id, 'Данные сохранены √')
+        self.bot.send_message(
+            message.chat.id, 'Ваш ID - ' + str(result))
 
         self.status = True
         print("self.status - " + str(self.status))
@@ -83,71 +91,58 @@ class Authorize():
 
 ###
 
-    def photo_log(self, message):
-        print('message.photo =', message)
+    def logInId(self, message):
+        self.user_id = message.text
+        mesg = self.bot.send_message(message.chat.id, 'Отправте своё фото: ↓')
+        self.bot.register_next_step_handler(mesg, self.logIN)
+
+    def logIN(self, message):
+
         print('message.photo =', message.photo)
         fileID = message.photo[-1].file_id
-        print('fileID-1 =', fileID)
+        print('fileID =', fileID)
         file_info = self.bot.get_file(fileID)
         print('file.file_path =', file_info.file_path)
         downloaded_file = self.bot.download_file(file_info.file_path)
 
-        with open("photos/log_img.jpg", 'wb') as new_file:
+        with open("photos/image_handler.jpg", 'wb') as new_file:
             new_file.write(downloaded_file)
 
-        mesg = self.bot.send_message(message.chat.id, 'Введите логин: ↓')
-
-        self.bot.register_next_step_handler(mesg, self.logIN)
-
-    def logIN(self, message):
         conn = sqlite3.connect("bgface.db")
         cursor = conn.cursor()
 
-        # Выполняем запрос к базе данных
-        cursor.execute(
-            'select login_photo from Users where id = ?', message.text)
+        print(self.user_id)
 
-        # Получаем результат запроса
-        result = cursor.fetchall()
+        cursor.execute(
+            'select login_photo from Users where id = ?', (self.user_id,))
+
+        result = cursor.fetchone()[0]
 
         if result is None:
-            mesg = self.bot.send_message(
+            self.bot.send_message(
                 message.chat.id, 'Такого пользователя нету')
         else:
-            self.user_id = message.text
-            with open("photos/log_img.jpg", 'rb') as f:
-                login_photo = f.read()
 
-                result = face.face_verify("photos/log_img.jpg")
-                self.bot.send_message(message.chat.id, "Verified - " + result)
-                print(result)
-                result_dist = face.face_analyz()
+            with open("photos/log_db_img.jpg", 'wb') as new_file:
+                new_file.write(result)
 
-                # print data json
-                infrastructyre.print_data_json(message, self.bot, result_dist)
+            result = face.face_verify_2(
+                "photos/image_handler.jpg", "photos/log_db_img.jpg")
+            self.bot.send_message(message.chat.id, "Verified - " + result)
+            print(result)
 
-        # Закрываем соединение с базой данных
+            if result == 'is True':
+                self.status = True
+                self.bot.send_message(
+                    message.chat.id, 'Авторизация прошла успешно ID пользователя : ' + str(self.user_id))
+            else:
+                self.status = False
+                self.bot.send_message(
+                    message.chat.id, 'Авторизация провалилась . \nПроверьте пароль или отправьте более чёткое фото')
+
         conn.close()
+
+###
 
     def louOUT(self):
         self.status = False
-
-
-# def photo(message):
-#     print('message.photo =', message.photo)
-#     fileID = message.photo[-1].file_id
-#     print('fileID =', fileID)
-#     file_info = bot.get_file(fileID)
-#     print('file.file_path =', file_info.file_path)
-#     downloaded_file = bot.download_file(file_info.file_path)
-
-#     with open("photos/image_handler.jpg", 'wb') as new_file:
-#         new_file.write(downloaded_file)
-
-#     result = face.face_verify("img/body11.jpg")
-#     bot.reply_to(message, "Verified - " + result)
-#     print(result)
-#     result_dist = face.face_analyz()
-
-#     # print data json
-#     infrastructyre.print_data_json(message, bot, result_dist)
