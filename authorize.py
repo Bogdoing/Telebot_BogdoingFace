@@ -52,32 +52,23 @@ class Authorize():
             new_file.write(downloaded_file)
 
         mesg = self.bot.send_message(message.chat.id, 'Введите пароль: ↓')
-
         self.bot.register_next_step_handler(mesg, self.addtoDB)
 
     def addtoDB(self, message):
-
         print("pass - " + message.text)
-
-        login = "login"
         with open("photos/registr_img.jpg", 'rb') as f:
             login_photo = f.read()
 
         print("l_p - " + str(login_photo))
-
         con = sqlite3.connect("bgface.db")
         print(con)
-
         c = con.cursor()
-
         c.execute('INSERT INTO Users (login, login_photo, password) VALUES (?, ?, ?)',
                   ("login", login_photo, message.text))
         con.commit()
-
         c.execute(
             'SELECT MAX(id) id from Users ')
         result = c.fetchall()
-
         con.close()
 
         self.bot.send_message(
@@ -97,7 +88,6 @@ class Authorize():
         self.bot.register_next_step_handler(mesg, self.logIN)
 
     def logIN(self, message):
-
         print('message.photo =', message.photo)
         fileID = message.photo[-1].file_id
         print('fileID =', fileID)
@@ -110,27 +100,20 @@ class Authorize():
 
         conn = sqlite3.connect("bgface.db")
         cursor = conn.cursor()
-
-        print(self.user_id)
-
         cursor.execute(
             'select login_photo from Users where id = ?', (self.user_id,))
-
         result = cursor.fetchone()[0]
 
         if result is None:
             self.bot.send_message(
                 message.chat.id, 'Такого пользователя нету')
         else:
-
             with open("photos/log_db_img.jpg", 'wb') as new_file:
                 new_file.write(result)
-
             result = face.face_verify_2(
                 "photos/image_handler.jpg", "photos/log_db_img.jpg")
             self.bot.send_message(message.chat.id, "Verified - " + result)
             print(result)
-
             if result == 'is True':
                 self.status = True
                 self.bot.send_message(

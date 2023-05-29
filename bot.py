@@ -2,7 +2,6 @@ import telebot
 from deepface import DeepFace
 import sqlite3
 
-import time
 
 import DATA
 import face
@@ -18,28 +17,10 @@ def send_welcome(message):
     bot.reply_to(message, "Howdy, how are you doing?")
 
 
-@bot.message_handler(commands=['comparison', 'com'])
-def comparison_face(message):
-    result = DeepFace.verify(img1_path="img/jim1.jpg",
-                             img2_path="img/jim2.jpg")
-    bot.reply_to(message, "Jim verified - " + str(result.get('verified')))
-    print(result)
-
-
-@bot.message_handler(commands=['comparison1', 'com1'])
-def comparison_face1(message):
-    infrastructyre.time_saver(message=message, bot=bot)
-    result = face.comparison_face("img/jim1.jpg", "img/jim2.jpg")
-    bot.reply_to(message, "Body verified - " + str(result.get('verified')))
-    print(result)
-
-
 @bot.message_handler(commands=['singin'])
 def sing(message):
     print('singIN')
-
     print('getStatus - ' + str(aut.getStatus()))
-
     if aut.getStatus() == True:
         mesg = bot.send_message(message.chat.id, 'Вы уже авторизированны.')
     else:
@@ -52,11 +33,9 @@ def sing(message):
 @bot.message_handler(commands=['login'])
 def login(message):
     print('logIN')
-
     if aut.getStatus() == True:
         mesg = bot.send_message(message.chat.id, 'Вы уже авторизированны.')
     else:
-        # mesg = bot.send_message(message.chat.id, 'Отправте своё фото: ↓')
         mesg = bot.send_message(message.chat.id, 'Введите свой Id: ↓')
         print("botT - " + str(bot))
         aut.getBotAut()
@@ -66,7 +45,6 @@ def login(message):
 @bot.message_handler(commands=['logout'])
 def logout(message):
     print('logOUT')
-
     if aut.getStatus() == False:
         mesg = bot.send_message(message.chat.id, 'Вы ещё не авторизированны.')
     else:
@@ -78,7 +56,6 @@ def logout(message):
 @bot.message_handler(commands=['info'])
 def info(message):
     print('info')
-
     if aut.getStatus() == False:
         bot.send_message(
             message.chat.id, 'Чтобы узнать информациб пользователя необходимо авторизоваться')
@@ -104,14 +81,24 @@ def faces_analyze(message):
     with open("photos/image_handler.jpg", 'wb') as new_file:
         new_file.write(downloaded_file)
 
-    # infrastructyre.time_saver(message=message, bot=bot)
-    # result = face.face_verify("img/body11.jpg")
-    # bot.reply_to(message, "Verified - " + result)
-    # print(result)
     result_dist = face.face_analyz()
-
-    # print data json
     infrastructyre.print_data_json(message, bot, result_dist)
 
 
 bot.infinity_polling()
+
+
+# @bot.message_handler(commands=['comparison', 'com'])
+# def comparison_face(message):
+#     result = DeepFace.verify(img1_path="img/jim1.jpg",
+#                              img2_path="img/jim2.jpg")
+#     bot.reply_to(message, "Jim verified - " + str(result.get('verified')))
+#     print(result)
+
+
+# @bot.message_handler(commands=['comparison1', 'com1'])
+# def comparison_face1(message):
+#     infrastructyre.time_saver(message=message, bot=bot)
+#     result = face.comparison_face("img/jim1.jpg", "img/jim2.jpg")
+#     bot.reply_to(message, "Body verified - " + str(result.get('verified')))
+#     print(result)
