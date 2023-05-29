@@ -83,9 +83,28 @@ class Authorize():
 ###
 
     def logInId(self, message):
-        self.user_id = message.text
-        mesg = self.bot.send_message(message.chat.id, 'Отправте своё фото: ↓')
-        self.bot.register_next_step_handler(mesg, self.logIN)
+
+        con = sqlite3.connect("bgface.db")
+        c = con.cursor()
+        c.execute(
+            'SELECT MAX(id) id from Users ')
+        result = c.fetchall()
+        con.close()
+
+        print("result = " + str(result) + " | message = " + message.text)
+
+        if int(result[0][0]) < int(message.text):
+            print("IF | result = " + str(result) +
+                  " >= message = " + message.text)
+            self.bot.send_message(
+                message.chat.id, 'Вы ввели не корректный ID пользователя')
+        else:
+            print("ELSE | result = " + str(result) +
+                  " <= message = " + message.text)
+            self.user_id = message.text
+            mesg = self.bot.send_message(
+                message.chat.id, 'Отправте своё фото: ↓')
+            self.bot.register_next_step_handler(mesg, self.logIN)
 
     def logIN(self, message):
         print('message.photo =', message.photo)

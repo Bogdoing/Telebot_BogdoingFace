@@ -41,11 +41,11 @@ def face_analyz():
             # json.dump(result, file, indent=4, ensure_ascii=False)
 
         print(result)
-        print(f'[+] Age: {result_dist.get("age")}')
-        print(f'[+] Gender: {result_dist.get("gender")}')
-        print(f'[+] Race domain: {result_dist.get("dominant_race")}')
-        print(f'[+] Race all: {result_dist.get("race")}')
-        print(f'[+] Dominant emotion: {result_dist.get("race")}')
+        # print(f'[+] Age: {result_dist.get("age")}')
+        # print(f'[+] Gender: {result_dist.get("gender")}')
+        # print(f'[+] Race domain: {result_dist.get("dominant_race")}')
+        # print(f'[+] Race all: {result_dist.get("race")}')
+        # print(f'[+] Dominant emotion: {result_dist.get("race")}')
 
         return result_dist
     except Exception as e:

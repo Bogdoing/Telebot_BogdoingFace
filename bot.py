@@ -82,7 +82,12 @@ def faces_analyze(message):
         new_file.write(downloaded_file)
 
     result_dist = face.face_analyz()
-    infrastructyre.print_data_json(message, bot, result_dist)
+    if result_dist == "Error face - face_analyz":
+        print("ERORS")
+        bot.send_message(
+            message.chat.id, 'Face not found. Try again \nЛицо не найдено. Попробуйте ещё раз')
+    else:
+        infrastructyre.print_data_json(message, bot, result_dist)
 
 
 bot.infinity_polling()
